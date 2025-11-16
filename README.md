@@ -1,2 +1,0 @@
-# guozhaozhi.github.io
-hello
