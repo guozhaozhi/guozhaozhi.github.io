@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G.seeker - exploring and thinking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 侦探网格背景 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        /* 导航栏 - 侦探风格 */
+        nav {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 30px rgba(0,0,0,0.5);
+            border-bottom: 2px solid #e74c3c;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            color: #ecf0f1;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #e74c3c;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 2rem;
+            position: relative;
+        }
+
+        .nav-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        .nav-links a:hover {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            text-shadow: 0 0 8px #e74c3c;
+        }
+
+        /* 主页横幅 - 柯南主题 */
+        .hero {
+            background: linear-gradient(135deg, 
+                rgba(26, 26, 46, 0.9) 0%, 
+                rgba(22, 33, 62, 0.8) 50%, 
+                rgba(15, 52, 96, 0.7) 100%),
+                url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=600&fit=crop') center/cover;
+            color: white;
+            text-align: center;
+            padding: 180px 2rem 100px;
+            margin-top: 60px;
+            position: relative;
+            border-bottom: 3px solid #e74c3c;
+        }
+        .magic-text {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 1.4rem;
+            font-weight: bold;
+            font-style: italic;
+            text-shadow: 
+            0 0 10px #e74c3c,
+            0 0 20px #3498db,
+            0 0 30px #f1c40f;
+    
+            /* 动态颜色渐变 */
+            background: linear-gradient(45deg, #e74c3c, #3498db, #f1c40f, #9b59b6);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s ease-in-out infinite;
+    
+            /* 文字效果 */
+            letter-spacing: 1px;
+            line-height: 1.5;
+            margin: 1.5rem auto;
+            max-width: 600px;
+        }
+
+            /* 动态光效动画 */
+            @keyframes shimmer {
+            0% {
+                 background-position: 0% 50%;
+                    text-shadow: 
+                        0 0 10px #e74c3c,
+                        0 0 20px #3498db,
+                        0 0 30px #f1c40f;
+                }
+            50% {
+                background-position: 100% 50%;
+                text-shadow: 
+                    0 0 15px #3498db,
+                    0 0 25px #e74c3c,
+                    0 0 35px #9b59b6;
+                }
+            100% {
+                background-position: 0% 50%;
+                text-shadow: 
+                    0 0 10px #f1c40f,
+                    0 0 20px #e74c3c,
+                    0 0 30px #3498db;
+                }
+        }
+
+/* 添加一个脉冲效果 */
+.magic-text::after {
+    content: '✨';
+    margin-left: 10px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+        .hero::after {
+            content: '🔍';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px #e74c3c;
+        }
+
+        .hero h1 {
+    font-family: "SimSun", "宋体", serif; /* 宋体 */
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    color: #bbbbc7; 
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px 35px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+            border: 2px solid transparent;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(231, 76, 60, 0.6);
+            border-color: #ecf0f1;
+        }
+
+        /* 主要内容区 */
+        .container {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            margin: 3rem 0;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-left: 5px solid #e74c3c;
+            position: relative;
+        }
+
+        .section::before {
+            content: '💼';
+            position: absolute;
+            top: -15px;
+            left: 30px;
+            background: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        /* 案件档案网格 */
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .case-card {
+            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            border-left: 4px solid #e74c3c;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .case-card::before {
+            content: '🔎';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            opacity: 0.3;
+        }
+
+        .case-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .case-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 0.5rem;
+        }
+
+        /* 侦探工具展示 */
+        .tools-showcase {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .tool-item {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .tool-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* 页脚 */
+        footer {
+            background: rgba(26, 26, 46, 0.95);
+            color: #ecf0f1;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-top: 2px solid #e74c3c;
+            position: relative;
+        }
+
+        footer::before {
+            content: '真相只有一个！';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            color: white;
+            padding: 5px 20px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .case-card:nth-child(2) { animation-delay: 0.2s; }
+        .case-card:nth-child(3) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">🔍 G.seeker
+            <ul class="nav-links">
+                <li><a href="index.html">导航首页</a></li>
+                <li><a href="about.html">关于自己</a></li>
+                <li><a href="portfolio.html">案件记录</a></li>
+                <li><a href="blog.html">看剧日志</a></li>
+                <li><a href="contact.html">联络暗号</a></li>
+            </ul>
+        </div>
+    </nav>
+
+   <!-- 主页横幅 -->
+<section class="hero">
+    <h1>Perhaps we are eternally in pursuit of the single truth</h1>
+    <p class="magic-text">
+        Welcome to my world! Come to explore my world and I will show you my inner thinking.
+    </p>
+    <a href="about.html" class="cta-button">know about me</a>
+</section>
+
+    <!-- 主要内容 -->
+    <div class="container">
+        <!-- 最新案件 -->
+        <div class="section">
+            <h2>📋 （名侦探柯南）案件记录</h2>
+            <div class="case-grid">
+                <div class="case-card">
+                    <h3>密室案件</h3>
+                    <p>分析经典密室杀人案件的作案手法和破解思路，包含多个柯南中的经典案例（推荐雪地别墅）</p>
+                    <span style="color: #e74c3c; font-size: 0.9rem;">🔒 难度：高级</span>
+                </div>
+                <div class="case-card">
+                    <h3>不在场证明</h3>
+                    <p>研究各种不在场证明的制造方法和破解技巧，学习如何识破时间诡计（推荐危险的食谱）</p>
+                    <span style="color: #e74c3c; font-size: 0.9rem;">⏰ 难度：中级</span>
+                </div>
+                <div class="case-card">
+                    <h3>精巧机关</h3>
+                    <p>破解各种精巧不易看见的小机关，当利用完之后消失于视野，需要强大的逻辑（推荐吸血鬼别墅）</p>
+                    <span style="color: #e74c3c; font-size: 0.9rem;">🔑 难度：初级</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 侦探工具 -->
+        <div class="section">
+            <h2>🛠️ Ever thought about becoming a detective?</h2>
+            <div class="tools-showcase">
+                <div class="tool-item">
+                    <span class="tool-icon">🔍</span>
+                    <div>细致入微地观察</div>
+                </div>
+                <div class="tool-item">
+                    <span class="tool-icon">👣</span>
+                    <div>逻辑严密地推理</div>
+                </div>
+                <div class="tool-item">
+                    <span class="tool-icon">💡</span>
+                    <div>灵光一现地思考</div>
+                </div>
+                <div class="tool-item">
+                    <span class="tool-icon">📝</span>
+                    <div>现实交织内心</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关于侦探 -->
+        <div class="section">
+            <h2>🕵️ 关于本侦探</h2>
+            <p>我是G.seeker，在这里，我想分享我对侦探世界天马行空的想象，记录内心想法，来了解我和我交流吧</p>
+            <p class="magic-text">
+                当法律的不可为和复仇的人性碰撞时，你的选择会是什么————正义究竟是什么？
+            </p>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        <p>&copy; 2025 G侦探事务所. 本网站受名侦探柯南启发制作</p>
+        <p>🔍 记住：在排除所有不可能之后，剩下的无论多么不可思议，都是真相！</p>
+    </footer>
+</body>
+</html>

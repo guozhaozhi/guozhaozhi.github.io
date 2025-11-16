@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>案件记录 · 项目档案</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', 'Microsoft YaHei', monospace;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0c0c1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        /* 档案室纸张效果 */
+        .paper-texture {
+            background-image: 
+                linear-gradient(rgba(255,253,242,0.95) 0%, rgba(255,253,242,0.95) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.1"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"></feTurbulence></filter><rect width="100" height="100" filter="url(%23noise)"></rect></svg>');
+        }
+
+        /* 导航栏 */
+        nav {
+            background: rgba(12, 12, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 30px rgba(0,0,0,0.7);
+            border-bottom: 1px solid #e74c3c;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            color: #ecf0f1;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px #e74c3c;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            padding: 0.3rem 0.8rem;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        /* 主要内容区 */
+        .container {
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 2rem;
+        }
+
+        /* 档案卡片 */
+        .dossier {
+            background: linear-gradient(145deg, #fffdf2, #f5f1e6);
+            margin: 2rem 0;
+            padding: 3rem;
+            border-radius: 2px;
+            box-shadow: 
+                0 5px 25px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+            border: 1px solid #d5c8a4;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dossier::before {
+            content: 'CASE FILES';
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+        }
+
+        /* 档案标题 */
+        .dossier-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e74c3c;
+            position: relative;
+        }
+
+        .dossier-header h1 {
+            font-family: 'Times New Roman', serif;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+
+        .dossier-header::after {
+            content: '●';
+            color: #e74c3c;
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fffdf2;
+            padding: 0 10px;
+        }
+
+        /* 案件分类筛选 */
+        .case-filter {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #e74c3c;
+            transform: translateY(-2px);
+        }
+
+        /* 案件网格 */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .case-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+            position: relative;
+        }
+
+        .case-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+        }
+
+        .case-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .case-info {
+            padding: 1.5rem;
+        }
+
+        .case-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #e74c3c;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .case-title {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .case-category {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .case-desc {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .case-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .case-tag {
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 0.2rem 0.6rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            border: 1px solid #bdc3c7;
+        }
+
+        .case-link {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 3px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: background 0.3s;
+            margin-top: 0.5rem;
+        }
+
+        .case-link:hover {
+            background: #2980b9;
+        }
+
+        /* 统计数据 */
+        .stats-section {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 2rem;
+            margin: 3rem 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item h3 {
+            font-size: 2rem;
+            color: #e74c3c;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 页脚 */
+        footer {
+            background: rgba(12, 12, 26, 0.95);
+            color: #bdc3c7;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid #e74c3c;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .cases-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .dossier {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">📂 案件记录 · PORTFOLIO</div>
+            <ul class="nav-links">
+                <li><a href="index.html">返回总部</a></li>
+                <li><a href="about.html">特工档案</a></li>
+                <li><a href="blog.html">看剧日志</a></li>
+                <li><a href="contact.html">联络暗号</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container">
+        <!-- 主档案 -->
+        <div class="dossier paper-texture">
+            <div class="dossier-header">
+                <h1>CASE PORTFOLIO</h1>
+                <p>项目档案 · 已解决案件记录</p>
+            </div>
+
+            <!-- 统计数据 -->
+            <div class="stats-section">
+                <h2>📊 案件统计</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h3>4</h3>
+                        <p>已解决案件</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>3</h3>
+                        <p>进行中项目</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>77%</h3>
+                        <p>成功率</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>5</h3>
+                        <p>大餐鼓励</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 案件筛选 -->
+            <div class="case-filter">
+                <button class="filter-btn active">全部案件</button>
+                <button class="filter-btn">网站开发</button>
+                <button class="filter-btn">任务准备</button>
+                <button class="filter-btn">备战考试</button>
+                <button class="filter-btn">体育实践</button>
+            </div>
+
+            <!-- 案件网格 -->
+            <div class="cases-grid">
+                <!-- 案件1 -->
+                <div class="case-card">
+                    <div class="case-number">CASE #001</div>
+                    <img src="images/烦.jpg" alt="侦探档案室网站" class="case-image">
+                    <div class="case-info">
+                        <div class="case-title">侦探档案室网站</div>
+                        <div class="case-category">网站开发</div>
+                        <p class="case-desc">基于侦探主题的个人作品集网站，采用复古档案室设计风格，包含响应式布局和交互动效。</p>
+                        <div class="case-tags">
+                            <span class="case-tag">HTML/CSS</span>
+                            <span class="case-tag">JavaScript</span>
+                            <span class="case-tag">响应式设计</span>
+                        </div>
+                        <a href="#" class="case-link">查看详情</a>
+                    </div>
+                </div>
+
+                <!-- 案件2 -->
+                <div class="case-card">
+                    <div class="case-number">CASE #002</div>
+                    <img src="images/头歌.png" alt="智商可视化平台" class="case-image">
+                    <div class="case-info">
+                        <div class="case-title">作业奋斗区</div>
+                        <div class="case-category">C语言</div>
+                        <p class="case-desc">每天不停奋斗写作业，deeeeeebug，我爱美丽头歌</p>
+                        <div class="case-tags">
+                            <span class="case-tag">C</span>
+                            <span class="case-tag">作业奋斗</span>
+                            <span class="case-tag">智商检测</span>
+                        </div>
+                        <a href="#" class="case-link">查看详情</a>
+                    </div>
+                </div>
+
+                <!-- 案件3 -->
+                <div class="case-card">
+                    <div class="case-number">CASE #003</div>
+                    <img src="images/体育.jpg" alt="体育赛事" class="case-image">
+                    <div class="case-info">
+                        <div class="case-title">体育实践</div>
+                        <div class="case-category">100接力</div>
+                        <p class="case-desc">第一次体育运动拿奖，好兆头</p>
+                        <div class="case-tags">
+                            <span class="case-tag">运动</span>
+                            <span class="case-tag">团队</span>
+                            <span class="case-tag">心情体验</span>
+                        </div>
+                        <a href="#" class="case-link">查看详情</a>
+                    </div>
+                </div>
+
+                <!-- 案件4 -->
+                <div class="case-card">
+                    <div class="case-number">CASE #004</div>
+                    <img src="images/辩论.jpg" alt="语言" class="case-image">
+                    <div class="case-info">
+                        <div class="case-title">辩论</div>
+                        <div class="case-category">团体</div>
+                        <p class="case-desc">鼓起勇气参加，很开心通过了</p>
+                        <div class="case-tags">
+                            <span class="case-tag">语言</span>
+                            <span class="case-tag">反应</span>
+                            <span class="case-tag">逻辑</span>
+                        </div>
+                        <a href="#" class="case-link">查看详情</a>
+                    </div>
+                </div>
+
+                <!-- 案件5 -->
+                <div class="case-card">
+                    <div class="case-number">CASE #005</div>
+                    <img src="images/宣传部.jpg" alt="学习技能" class="case-image">
+                    <div class="case-info">
+                        <div class="case-title">院学生会</div>
+                        <div class="case-category">推文制作</div>
+                        <p class="case-desc">学习学习，目前来看还是很热爱这个工作的</p>
+                        <div class="case-tags">
+                            <span class="case-tag">推文</span>
+                            <span class="case-tag">PS</span>
+                            <span class="case-tag">任务完成</span>
+                        </div>
+                        <a href="#" class="case-link">查看详情</a>
+                    </div>
+                </div>
+
+                <!-- 案件6 -->
+                <div class="case-card">
+                    <div class="case-number">CASE #006</div>
+                    <img src="images/air.png" alt="unix" class="case-image">
+                    <div class="case-info">
+                        <div class="case-title">air</div>
+                        <div class="case-category">创意加脑力</div>
+                        <p class="case-desc">在创建的world里创意创作</p>
+                        <div class="case-tags">
+                            <span class="case-tag">airhust</span>
+                            <span class="case-tag">ros</span>
+                            <span class="case-tag">PX4</span>
+                        </div>
+                        <a href="#" class="case-link">查看详情</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>🔒 本档案内容包含机密项目信息，未经授权禁止访问</p>
+        <p>© 2025 G.Seeker案件记录 · 所有权利保留</p>
+    </footer>
+</body>
+</html>

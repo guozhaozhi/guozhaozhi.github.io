@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推理日志 · 影剧档案</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', 'Microsoft YaHei', monospace;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(52, 152, 219, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(155, 89, 182, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        /* 明亮的纸张效果 */
+        .paper-texture {
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.95) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"></feTurbulence></filter><rect width="100" height="100" filter="url(%23noise)"></rect></svg>');
+        }
+
+        /* 导航栏 */
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #3498db;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px #3498db;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #34495e;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            padding: 0.3rem 0.8rem;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            color: #3498db;
+            border: 1px solid #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        /* 主要内容区 */
+        .container {
+            max-width: 1200px; /* 增加容器宽度以适应3列 */
+            margin: 80px auto 0;
+            padding: 2rem;
+        }
+
+        /* 日志卡片 */
+        .blog-post {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            margin: 2rem 0;
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 
+                0 5px 25px rgba(0,0,0,0.08),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid #e0e6ed;
+            position: relative;
+        }
+
+        .blog-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #3498db;
+            position: relative;
+        }
+
+        .blog-header h1 {
+            font-family: 'Times New Roman', serif;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+
+        .blog-date {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* 剧集网格 - 修改为固定3列 */
+        .drama-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 固定3列 */
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .drama-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #e0e6ed;
+            display: flex;
+            flex-direction: column; /* 确保卡片内容垂直排列 */
+        }
+
+        .drama-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .drama-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #e0e6ed;
+            flex-shrink: 0; /* 防止图片被压缩 */
+        }
+
+        .drama-info {
+            padding: 1.5rem;
+            flex-grow: 1; /* 让信息区域填充剩余空间 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drama-title {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .drama-rating {
+            color: #f39c12;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .drama-desc {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            flex-grow: 1; /* 让描述填充剩余空间，保持卡片高度一致 */
+        }
+
+        /* 音乐舞蹈专区 */
+        .music-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem;
+            margin: 3rem 0;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .music-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><path fill="white" d="M50 20L60 40H40zM30 60L40 80H20zM70 60L80 80H60z"/></svg>');
+        }
+
+        .music-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .music-image {
+            width: 300px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 1rem auto;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* 标签系统 */
+        .tag-system {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .tag {
+            background: #3498db;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: none;
+        }
+
+        .tag.music {
+            background: #9b59b6;
+        }
+
+        .tag.drama {
+            background: #e74c3c;
+        }
+
+        .tag.fun {
+            background: #f39c12;
+        }
+
+        /* 引用样式 */
+        .quote {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            border-left: 5px solid #2c3e50;
+            font-style: italic;
+            position: relative;
+        }
+
+        /* 页脚 */
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            color: #7f8c8d;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid #3498db;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .drama-grid {
+                grid-template-columns: repeat(2, 1fr); /* 平板改为2列 */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .drama-grid {
+                grid-template-columns: 1fr; /* 手机单列 */
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .blog-post {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">📝 推理日志 · BLOG</div>
+            <ul class="nav-links">
+                <li><a href="index.html">返回总部</a></li>
+                <li><a href="about.html">特工档案</a></li>
+                <li><a href="portfolio.html">案件记录</a></li>
+                <li><a href="contact.html">联络暗号</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container">
+        <!-- 博客文章 -->
+        <div class="blog-post paper-texture">
+            <div class="blog-header">
+                <h1>影剧观察日志</h1>
+                <div class="blog-date">📅 档案更新日期：2025年11月 | 🏷️ 分类：娱乐分析</div>
+                <div class="tag-system">
+                    <span class="tag drama">悬疑推理</span>
+                    <span class="tag music">音乐舞蹈</span>
+                    <span class="tag fun">休闲娱乐</span>
+                </div>
+            </div>
+
+            <!-- 个人陈述 -->
+            <div class="quote">
+                "热爱追剧，emmmm除了名柯，还有以下看剧blog（推荐😄）"
+            </div>
+
+            <!-- 近期观剧 -->
+            <h2>🎬 近期观剧记录</h2>
+            <p style="margin: 1rem 0; color: #5d6d7e;">通过对多部作品的观察分析，记录下那些令人印象深刻的角色</p>
+            
+            <!-- 修复这里：添加了 < 符号 -->
+            <div class="drama-grid">
+                <!-- 剧集1 -->
+                <div class="drama-card">
+                    <img src="images/罗韧.jpg" alt="悬疑剧照" class="drama-image">
+                    <div class="drama-info">
+                        <div class="drama-title">《七根心简》</div>
+                        <div class="drama-rating">★★★★☆</div>
+                        <div class="drama-desc">环环相扣的悬疑剧情，出人意料的剧情走势</div>
+                    </div>
+                </div>
+
+                <!-- 剧集2 -->
+                <div class="drama-card">
+                    <img src="images/沈巍.jpg" alt="推理剧照" class="drama-image">
+                    <div class="drama-info">
+                        <div class="drama-title">《镇魂》</div>
+                        <div class="drama-rating">★★★★★</div>
+                        <div class="drama-desc">想象奇特的两个世界，穿梭于两个世界的寻找真相</div>
+                    </div>
+                </div>
+
+                <!-- 剧集3 -->
+                <div class="drama-card">
+                    <img src="images/热巴.jpg" alt="美神降临" class="drama-image">
+                    <div class="drama-info">
+                        <div class="drama-title">《麻辣变形记》</div>
+                        <div class="drama-rating">★★★☆☆</div>
+                        <div class="drama-desc">略显中二，但是是爽文</div>
+                    </div>
+                </div>
+
+                <!-- 剧集5 - 名侦探柯南 -->
+<div class="drama-card">
+    <img src="images/kd.jpg" alt="名侦探柯南" class="drama-image">
+    <div class="drama-info">
+        <div class="drama-title">《名侦探柯南》</div>
+        <div class="drama-rating">★★★★★</div>
+        <div class="drama-desc">永远的推理经典，每个案件都值得细细品味</div>
+    </div>
+</div>
+                <!-- 剧集4 -->
+                <div class="drama-card">
+                    <img src="images/陈都灵.jpg" alt="美神剧照" class="drama-image">
+                    <div class="drama-info">
+                        <div class="drama-title">《莲花楼》</div>
+                        <div class="drama-rating">★★★★☆</div>
+                        <div class="drama-desc">古典探案剧情，有神秘有复杂有破案</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 音乐舞蹈专区 -->
+            <div class="music-section">
+                <div class="music-content">
+                    <h2>🎵 音乐舞蹈热爱区</h2>
+                    <p>在推理分析之余，音乐与舞蹈是放松心情、激发灵感的最佳方式。</p>
+                    
+                    <img src="images/k.jpg" alt="音乐舞蹈表演" class="music-image">
+                    
+                    <div class="tag-system">
+                        <span class="tag music">K-POP</span>
+                        <span class="tag music">现代舞</span>
+                        <span class="tag music">爵士乐</span>
+                    </div>
+                    
+                    <p style="margin-top: 1rem; font-size: 0.9rem;">
+                        kpop美神降临，对音乐的热爱能让人开心哦，<br>
+                        这种艺术形式与推理有着异曲同工之妙——都需要对细节的敏锐感知。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 观剧心得 -->
+            <h2>🔍 观察心得</h2>
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0;">
+                <h3 style="color: #2c3e50; margin-bottom: 1rem;">分析总结：</h3>
+                <ul style="color: #5d6d7e; line-height: 1.8;">
+                    <li>优秀的悬疑剧往往在开头就埋下伏笔，最后回马枪才是精华</li>
+                    <li>角色塑造的真实性直接影响观众的代入感</li>
+                    <li>舞台表现力还是要从真实舞台上来看</li>
+                    <li>音乐🎵果然是世界上必不可缺的元素</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>🎭 本日志内容基于个人观察分析，仅供娱乐参考</p>
+        <p>© 2025 侦探事务所推理日志 · 记录每一个精彩瞬间</p>
+    </footer>
+</body>
+</html>

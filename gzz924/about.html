@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>侦探档案室 - 关于我</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', 'Microsoft YaHei', monospace;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0c0c1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        /* 档案室纸张效果 */
+        .paper-texture {
+            background-image: 
+                linear-gradient(rgba(255,253,242,0.9) 0%, rgba(255,253,242,0.9) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.1"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"></feTurbulence></filter><rect width="100" height="100" filter="url(%23noise)"></rect></svg>');
+        }
+
+        /* 导航栏 - 档案室风格 */
+        nav {
+            background: rgba(12, 12, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 30px rgba(0,0,0,0.7);
+            border-bottom: 1px solid #e74c3c;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            color: #ecf0f1;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px #e74c3c;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            padding: 0.3rem 0.8rem;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        /* 主要内容区 */
+        .container {
+            max-width: 1000px;
+            margin: 80px auto 0;
+            padding: 2rem;
+        }
+
+        /* 档案卡片 */
+        .dossier {
+            background: linear-gradient(145deg, #fffdf2, #f5f1e6);
+            margin: 2rem 0;
+            padding: 3rem;
+            border-radius: 2px;
+            box-shadow: 
+                0 5px 25px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+            border: 1px solid #d5c8a4;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dossier::before {
+            content: 'CONFIDENTIAL';
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+        }
+
+        /* 档案标题 */
+        .dossier-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e74c3c;
+            position: relative;
+        }
+
+        .dossier-header h1 {
+            font-family: 'Times New Roman', serif;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+
+        .dossier-header::after {
+            content: '●';
+            color: #e74c3c;
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fffdf2;
+            padding: 0 10px;
+        }
+
+        /* 个人信息网格 */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .profile-photo {
+            text-align: center;
+        }
+
+        .photo-frame {
+            width: 200px;
+            height: 250px;
+            border: 8px solid #2c3e50;
+            padding: 5px;
+            background: #ecf0f1;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            margin: 0 auto;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: 1px solid #bdc3c7;
+        }
+
+        .profile-info h2 {
+            color: #e74c3c;
+            margin-bottom: 1rem;
+            font-family: 'Times New Roman', serif;
+            border-bottom: 1px solid #bdc3c7;
+            padding-bottom: 0.5rem;
+        }
+
+        /* 标签系统 */
+        .tag-system {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .tag {
+            background: #34495e;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            border: 1px solid #2c3e50;
+        }
+
+        .tag.primary {
+            background: #e74c3c;
+            border-color: #c0392b;
+        }
+
+        /* 时间轴 */
+        .timeline {
+            position: relative;
+            margin: 2rem 0;
+            padding-left: 2rem;
+            border-left: 2px solid #e74c3c;
+        }
+
+        .timeline-item {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 3px;
+            border: 1px solid #e0e0e0;
+            position: relative;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.4rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: #e74c3c;
+            border-radius: 50%;
+            border: 2px solid #fffdf2;
+        }
+
+        .timeline-date {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 技能雷达图区域 */
+        .skills-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .skill-category {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 3px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .skill-category h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .skill-stars {
+            color: #e74c3c;
+            font-size: 1.2rem;
+        }
+
+        /* 引用样式 */
+        .quote {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 3px;
+            border-left: 5px solid #e74c3c;
+            font-style: italic;
+            position: relative;
+        }
+
+        .quote::before {
+            content: '"';
+            font-size: 4rem;
+            color: rgba(231, 76, 60, 0.3);
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-family: serif;
+        }
+
+        /* 页脚 */
+        footer {
+            background: rgba(12, 12, 26, 0.95);
+            color: #bdc3c7;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid #e74c3c;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">📁 档案室 · ABOUT</div>
+            <ul class="nav-links">
+                <li><a href="../index.html">返回总部</a></li>
+                <li><a href="portfolio.html">案件记录</a></li>
+                <li><a href="blog.html">看剧日志</a></li>
+                <li><a href="contact.html">联络暗号</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container">
+        <!-- 主档案 -->
+        <div class="dossier paper-texture">
+            <div class="dossier-header">
+                <h1>SPECIAL AGENT DOSSIER</h1>
+                <p>机密档案 · 限内部传阅</p>
+            </div>
+
+            <!-- 个人信息 -->
+            <div class="profile-grid">
+                <div class="profile-photo">
+                    <div class="photo-frame">
+                        <!-- 替换成你的照片 -->
+                        <img src="../images/装.jpg" alt="特工照片">
+                    </div>
+                    <div class="tag-system" style="margin-top: 1rem;">
+                        <span class="tag primary">ACTIVE</span>
+                        <span class="tag">LEVEL A</span>
+                        <span class="tag">CLEARED</span>
+                    </div>
+                </div>
+                
+                <div class="profile-info">
+                    <h2>AGENT PROFILE</h2>
+                    <p><strong>代号：</strong>G.seeker</p>
+                    <p><strong>隶属：</strong>G侦探事务所</p>
+                    <p><strong>专长：</strong>逻辑推理 · 八卦破解 · 现场蹦哒</p>
+                    
+                    <div style="margin: 1.5rem 0;">
+                        <h3>特征标签</h3>
+                        <div class="tag-system">
+                            <span class="tag">细节观察</span>
+                            <span class="tag">逻辑思维</span>
+                            <span class="tag">冷静分析</span>
+                            <span class="tag">好奇心强</span>
+                            <span class="tag">正义感</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 个人陈述 -->
+            <div class="quote">
+                "A secret makes a woman woman,but a secret shared is a bond of sisterhood."
+            </div>
+
+            <!-- 时间轴 -->
+            <h2>MISSION TIMELINE</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">2018 - PRESENT</div>
+                    <h4>高级推理分析师</h4>
+                    <p>奔波于内娱吃瓜一线，但是能够始终保持清醒，不偏听偏信，清醒判断</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2015 - 2018</div>
+                    <h4>质量评测员</h4>
+                    <p>辗转于各大剧播平台的大型综艺之间，看剧丰富</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2012 - 2015</div>
+                    <h4>现场调查分子</h4>
+                    <p>在老家的各个村头来往，精通风靡孩童之间的体力游戏</p>
+                </div>
+            </div>
+
+            <!-- 技能评估 -->
+            <div class="skills-section">
+                <h2>SKILLS ASSESSMENT</h2>
+                <div class="skills-grid">
+                    <div class="skill-category">
+                        <h4>逻辑推理</h4>
+                        <div class="skill-stars">★★★★★</div>
+                    </div>
+                    <div class="skill-category">
+                        <h4>观察分析</h4>
+                        <div class="skill-stars">★★★★☆</div>
+                    </div>
+                    <div class="skill-category">
+                        <h4>体力评估</h4>
+                        <div class="skill-stars">★★★☆☆</div>
+                    </div>
+                    <div class="skill-category">
+                        <h4>心理素质</h4>
+                        <div class="skill-stars">★★★★☆</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>🔒 本档案内容属机密信息，未经授权禁止复制或传播</p>
+        <p>© 2025 侦探事务所档案室 · 所有权利保留</p>
+    </footer>
+</body>
+</html>

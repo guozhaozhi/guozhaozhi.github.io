@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联络暗号 · 机密通讯</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', 'Microsoft YaHei', monospace;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0c0c1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        /* 档案室纸张效果 */
+        .paper-texture {
+            background-image: 
+                linear-gradient(rgba(255,253,242,0.95) 0%, rgba(255,253,242,0.95) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.1"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"></feTurbulence></filter><rect width="100" height="100" filter="url(%23noise)"></rect></svg>');
+        }
+
+        /* 导航栏 */
+        nav {
+            background: rgba(12, 12, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 30px rgba(0,0,0,0.7);
+            border-bottom: 1px solid #e74c3c;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            color: #ecf0f1;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px #e74c3c;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            padding: 0.3rem 0.8rem;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        /* 主要内容区 */
+        .container {
+            max-width: 1000px;
+            margin: 80px auto 0;
+            padding: 2rem;
+        }
+
+        /* 档案卡片 */
+        .dossier {
+            background: linear-gradient(145deg, #fffdf2, #f5f1e6);
+            margin: 2rem 0;
+            padding: 3rem;
+            border-radius: 2px;
+            box-shadow: 
+                0 5px 25px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+            border: 1px solid #d5c8a4;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dossier::before {
+            content: 'TOP SECRET';
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+        }
+
+        /* 档案标题 */
+        .dossier-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e74c3c;
+            position: relative;
+        }
+
+        .dossier-header h1 {
+            font-family: 'Times New Roman', serif;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+
+        .dossier-header::after {
+            content: '●';
+            color: #e74c3c;
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fffdf2;
+            padding: 0 10px;
+        }
+
+        /* 联系信息网格 */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .contact-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .contact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .contact-info {
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .contact-link {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            margin: 0.2rem;
+        }
+
+        .contact-link:hover {
+            background: #2980b9;
+        }
+
+        /* 联系表单 */
+        .contact-form {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+            margin: 3rem 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            transition: border 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .submit-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .submit-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background: #c0392b;
+        }
+
+        .submit-btn.qq {
+            background: #12b7f5;
+        }
+
+        .submit-btn.qq:hover {
+            background: #0a9bd4;
+        }
+
+        /* 密码破译游戏 */
+        .cipher-game {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .cipher-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 4px;
+            width: 200px;
+            margin: 1rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .cipher-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 安全协议 */
+        .security-notice {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            margin: 2rem 0;
+        }
+
+        .protocol-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .protocol-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .protocol-list li:before {
+            content: '🔒';
+            margin-right: 0.5rem;
+        }
+
+        /* 页脚 */
+        footer {
+            background: rgba(12, 12, 26, 0.95);
+            color: #bdc3c7;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid #e74c3c;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .dossier {
+                padding: 2rem 1.5rem;
+            }
+            
+            .submit-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">🕵️ 联络暗号 · CONTACT</div>
+            <ul class="nav-links">
+                <li><a href="index.html">返回总部</a></li>
+                <li><a href="about.html">特工档案</a></li>
+                <li><a href="portfolio.html">案件记录</a></li>
+                <li><a href="blog.html">推理日志</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container">
+        <!-- 主档案 -->
+        <div class="dossier paper-texture">
+            <div class="dossier-header">
+                <h1>SECURE COMMUNICATION</h1>
+                <p>安全通讯协议 · 加密传输</p>
+            </div>
+
+            <!-- 安全通知 -->
+            <div class="security-notice">
+                <h3>⚠️ 安全通讯协议</h3>
+                <p>为确保通讯安全，请遵守以下协议：</p>
+                <ul class="protocol-list">
+                    <li>所有通讯内容均采用端到端加密</li>
+                    <li>验证身份后方可建立安全连接</li>
+                    <li>敏感信息请使用指定加密方式传输</li>
+                    <li>定期更换通讯密码和验证方式</li>
+                </ul>
+            </div>
+
+            <!-- 联系信息网格 -->
+            <div class="contact-grid">
+                <!-- 邮箱 -->
+                <div class="contact-card">
+                    <div class="contact-icon">📧</div>
+                    <h3>QQ邮箱联系</h3>
+                    <p class="contact-info" style="font-family: 'Courier New'; background: #f8f9fa; padding: 0.5rem; border-radius: 4px;">
+                        3558509716@qq.com
+                    </p>
+                    <div>
+                        <a href="mailto:3558509716@qq.com?subject=网站联系&body=你好，我从你的侦探网站联系你..." 
+                           class="contact-link">
+                            📧 发送邮件
+                        </a>
+                        <button onclick="copyEmail()" class="contact-link" style="background: #27ae60;">
+                            📋 复制邮箱
+                        </button>
+                    </div>
+                </div>
+
+                <!-- QQ联系 -->
+                <div class="contact-card">
+                    <div class="contact-icon">💬</div>
+                    <h3>QQ直接联系</h3>
+                    <p class="contact-info">QQ: 3558509716<br>即时对话沟通</p>
+                    <a href="https://wpa.qq.com/msgrd?v=3&uin=3558509716&site=qq&menu=yes" 
+                       target="_blank" 
+                       class="contact-link" 
+                       style="background: #12b7f5;">
+                        💬 打开QQ对话
+                    </a>
+                </div>
+
+                <!-- 紧急联系 -->
+                <div class="contact-card">
+                    <div class="contact-icon">🚨</div>
+                    <h3>紧急通讯</h3>
+                    <p class="contact-info">重要事务合作<br>请详细描述需求</p>
+                    <a href="#contact-form" class="contact-link" style="background: #e74c3c;">
+                        📝 填写紧急表单
+                    </a>
+                </div>
+            </div>
+
+            <!-- 联系表单 -->
+            <div class="contact-form" id="contact-form">
+                <h2 style="text-align: center; margin-bottom: 2rem; color: #2c3e50;">📝 发送加密信息</h2>
+                
+                <form id="messageForm">
+                    <div class="form-group">
+                        <label for="codename">你的称呼</label>
+                        <input type="text" id="codename" name="codename" class="form-control" placeholder="请输入你的姓名或代号" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact">你的联系方式</label>
+                        <input type="text" id="contact" name="contact" class="form-control" placeholder="请输入邮箱/QQ/微信等" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">消息主题</label>
+                        <input type="text" id="subject" name="subject" class="form-control" placeholder="请简要描述来意" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">详细内容</label>
+                        <textarea id="message" name="message" class="form-control" placeholder="请详细描述你的需求或问题..." required></textarea>
+                    </div>
+
+                    <div class="submit-buttons">
+                        <button type="button" onclick="sendToEmail()" class="submit-btn">
+                            📧 发送到QQ邮箱
+                        </button>
+                        <button type="button" onclick="openQQChat()" class="submit-btn qq">
+                            💬 打开QQ对话
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 密码破译游戏 -->
+            <div class="cipher-game">
+                <h2>🎯 密码破译测试</h2>
+                <p>证明你的密码学技能，通过测试可获得优先联系权限</p>
+                
+                <div style="margin: 2rem 0;">
+                    <p>破译以下密码：</p>
+                    <p style="font-family: 'Courier New', monospace; font-size: 1.2rem; margin: 1rem 0;">
+                        1+1=？
+                    </p>
+                    
+                    <input type="text" class="cipher-input" placeholder="输入破译结果">
+                    <button class="cipher-btn">验证答案</button>
+                </div>
+            </div>
+
+            <!-- 响应时间 -->
+            <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+                <h3>⏰ 预计响应时间</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4 style="color: #e74c3c;">紧急任务</h4>
+                        <p>2小时内响应</p>
+                    </div>
+                    <div>
+                        <h4 style="color: #f39c12;">案件合作</h4>
+                        <p>24小时内响应</p>
+                    </div>
+                    <div>
+                        <h4 style="color: #3498db;">一般咨询</h4>
+                        <p>48小时内响应</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>🔐 所有通讯均受加密保护，未经授权访问将被记录</p>
+        <p>© 2025 侦探事务所安全通讯 · 机密信息</p>
+    </footer>
+
+    <script>
+        // 复制邮箱功能
+        function copyEmail() {
+            navigator.clipboard.writeText('3558509716@qq.com').then(function() {
+                alert('✅ 邮箱地址已复制：3558509716@qq.com');
+            }).catch(function() {
+                // 兼容旧浏览器
+                const textArea = document.createElement('textarea');
+                textArea.value = '3558509716@qq.com';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ 邮箱地址已复制：3558509716@qq.com');
+            });
+        }
+
+        // 发送到QQ邮箱功能
+        function sendToEmail() {
+            const form = document.getElementById('messageForm');
+            const formData = new FormData(form);
+            
+            const name = formData.get('codename');
+            const contact = formData.get('contact');
+            const subject = formData.get('subject');
+            const message = formData.get('message');
+            
+            // 构建邮件内容
+            const emailBody = `
+来自网站联系表单的消息：
+
+称呼：${name}
+联系方式：${contact}
+主题：${subject}
+
+详细内容：
+${message}
+
+------------------------
+此消息来自侦探网站联系表单
+            `.trim();
+            
+            // 打开邮件客户端
+            const mailtoLink = `mailto:3558509716@qq.com?subject=网站联系：${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+            window.location.href = mailtoLink;
+            
+            alert('📧 正在打开邮件客户端...\n请检查弹出的邮件窗口，点击发送即可。');
+        }
+
+        // 打开QQ对话功能
+        function openQQChat() {
+            const form = document.getElementById('messageForm');
+            const formData = new FormData(form);
+            
+            const name = formData.get('codename');
+            const subject = formData.get('subject');
+            
+            // 构建QQ消息提示
+            const qqMessage = `你好！我是${name}，从你的侦探网站联系你。主题：${subject}`;
+            
+            // 打开QQ对话
+            const qqLink = `https://wpa.qq.com/msgrd?v=3&uin=3558509716&site=qq&menu=yes&msg=${encodeURIComponent(qqMessage)}`;
+            window.open(qqLink, '_blank');
+            
+            alert('💬 正在打开QQ对话窗口...\n如果QQ已安装，将直接启动对话。');
+        }
+
+        // 密码游戏功能
+        document.querySelector('.cipher-btn').addEventListener('click', function() {
+            const answer = document.querySelector('.cipher-input').value;
+            if (answer === '2') {
+                alert('🎉 密码破译成功！你已获得优先联系权限。');
+            } else {
+                alert('❌ 密码错误，请重新尝试。提示：小学高级数学知识');
+            }
+        });
+    </script>
+</body>
+</html>
